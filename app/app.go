@@ -35,7 +35,7 @@ func Start() {
 
 func sanityCheck() {
 	envVariable := []string{
-		"SERVER_ADDRESS", "SERVER_PORT", "DB_USER", "DB_PASSWD", "DB_HOST", "DB_PORT", "DB_NAME",
+		"SERVER_ADDRESS", "SERVER_PORT", "DB_USER", "DB_PASSWD", "DB_HOST", "DB_PORT", "DB_NAME","SECRET",
 	}
 	for _, v := range envVariable {
 		if os.Getenv(v) == "" {

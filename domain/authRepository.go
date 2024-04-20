@@ -2,8 +2,10 @@ package domain
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"github.com/scarecrow-404/banking-auth/errs"
 	"github.com/scarecrow-404/banking-auth/logger"
 )
@@ -19,7 +21,7 @@ type AuthRepositoryDB struct{
 }
 
 func NewAuthRepository(client *sqlx.DB) AuthRepositoryDB {
-	return AuthRepositoryDB{client: client}
+	return AuthRepositoryDB{client}
 }
 
 func (d AuthRepositoryDB) Refresh(refreshToken string)  *errs.AppError {
@@ -55,15 +57,18 @@ func (d AuthRepositoryDB) GenerateTokenToStore(authToken AuthToken) (string, *er
 
 func (d AuthRepositoryDB) FindBy(username,password string) (*Login,*errs.AppError){
 	var login Login
-	sqlQuery := `SELECT username, u.customer_id AS user_customer_id, role, group_concat(a.account_id) AS account_ids
+	sqlQuery := `SELECT u.username, u.customer_id AS customer_id, role, string_agg(CAST(a.account_id AS text), ',') AS account_id
 	FROM users u
-	LEFT JOIN accounts a ON a.customer_id = u.customer_id
-	WHERE username = $1 AND password = $2`
+	left JOIN accounts a ON a.customer_id = u.customer_id
+	WHERE username = $1 AND password = $2
+	GROUP BY username, u.customer_id, role`
 	err := d.client.Get(&login, sqlQuery, username, password)
 	if err != nil {
 		if err == sql.ErrNoRows {
+			fmt.Println(login)
 			return nil, errs.NewNotFoundError("user not found")
 		} else {
+			
 			logger.Error("Error while scanning user:" + err.Error())
 			return nil, errs.NewUnexpectedError("unexpected database error")
 		}

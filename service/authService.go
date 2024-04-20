@@ -41,7 +41,7 @@ func (s DefaultAuthService) Login(req dto.LoginRequest) (*dto.LoginResponse,*err
 	var appErr *errs.AppError
 	var login *domain.Login
 
-	if login,appErr = s.repo.FindBy(req.Username,req.Username); appErr != nil{
+	if login,appErr = s.repo.FindBy(req.Username,req.Password); appErr != nil{
 		return nil, appErr
 	}
 	claims := login.ClaimsForAccessToken()
