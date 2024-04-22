@@ -3,7 +3,7 @@ package domain
 import (
 	"errors"
 	"os"
-	
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/scarecrow-404/banking-auth/errs"
 	"github.com/scarecrow-404/banking-auth/logger"
@@ -29,8 +29,7 @@ return signedString,nil
 }
 
 func (t AuthToken) NewRefreshToken() (string, *errs.AppError) {
-	c:= t.token.Claims.(jwt.MapClaims)
-	c["refresh"] = true
+	
 	signedString,err := t.token.SignedString([]byte(getSecret()))
 	if err != nil {
 		logger.Error("Error while signing token" + err.Error())
@@ -40,7 +39,7 @@ return signedString,nil
 }
 
 func NewAuthToken(claims jwt.Claims) AuthToken {
-	token := jwt.NewWithClaims(&jwt.SigningMethodHMAC{},claims)
+	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"),claims)
 	return AuthToken{token: token}
 }
 
